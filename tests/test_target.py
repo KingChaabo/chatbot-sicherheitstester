@@ -96,7 +96,7 @@ def test_load_target_secrets_and_missing_keys(tmp_path):
     )
     cfg = load_target(tmp_path / "t.toml")
     assert cfg.secret == "S" and cfg.instructions_file is None
-    assert cfg.solution_file == tmp_path / "../l.md"
+    assert cfg.solution_file == (tmp_path / "../l.md").resolve()
     assert cfg.solution_file.is_absolute()
     assert cfg.permission_confirmed is True and cfg.permission_note == "ok"
     (tmp_path / "bad.toml").write_text('name = "X"\nurl = "u"\n[response]\npath = "a"\n', encoding="utf-8")
@@ -234,3 +234,28 @@ def test_permission():
     with pytest.raises(PermissionMissing, match="example.com"):
         check_permission(make_cfg(url="https://example.com/v1/chat/completions"))
     check_permission(make_cfg(url="https://example.com/v1/chat/completions", permission_confirmed=True))
+
+
+def test_other_httpx_errors_become_target_error():
+    def handler(request):
+        raise httpx.DecodingError("kaputtes gzip", request=request)
+
+    target, fake = make_target(handler)
+    with pytest.raises(TargetError, match="fehlgeschlagen"):
+        target.send(USER_X)
+    assert fake.sleeps == []
+
+
+def test_secret_paths_are_absolute_and_normalised(tmp_path, monkeypatch):
+    (tmp_path / "ziele").mkdir()
+    (tmp_path / "ziele" / "t.toml").write_text(
+        'name = "X"\nurl = "http://localhost/x"\n'
+        '[request]\nbody = "{}"\n[response]\npath = "a"\n'
+        '[secrets]\nsolution_file = "../x/l.md"\n',
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    cfg = load_target(Path("ziele/t.toml"))
+    assert cfg.solution_file.is_absolute()
+    assert ".." not in cfg.solution_file.parts
+    assert cfg.solution_file == (tmp_path / "x" / "l.md").resolve()

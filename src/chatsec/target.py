@@ -55,7 +55,7 @@ def load_target(path: Path) -> TargetConfig:
 
     def resolve(key: str) -> Path | None:
         value = secrets.get(key)
-        return path.parent / value if value else None
+        return (path.parent / value).resolve() if value else None
 
     return TargetConfig(
         name=_require(data, "name", "name"),
@@ -134,6 +134,10 @@ class Target:
             except httpx.TransportError as exc:
                 reason = f"Verbindungsfehler ({exc.__class__.__name__}: {exc})"
                 continue
+            except (httpx.HTTPError, httpx.InvalidURL) as exc:
+                raise TargetError(
+                    f"Die Anfrage an den Chatbot ist fehlgeschlagen ({exc.__class__.__name__}: {exc})."
+                ) from exc
             status = response.status_code
             if status == 429 or status >= 500:
                 reason = f"Der Chatbot antwortete mit Status {status}"
