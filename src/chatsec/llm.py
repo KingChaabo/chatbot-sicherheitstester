@@ -119,7 +119,10 @@ class OpenAICompatibleModel:
             names = {item["id"] for item in response.json()["data"]}
         except (ValueError, KeyError, TypeError) as error:
             raise ModelResponseError("Die Modell-Liste von Ollama ist nicht lesbar.") from error
-        if self.model not in names:
+        accepted = {self.model}
+        if ":" not in self.model:
+            accepted.add(f"{self.model}:latest")
+        if not accepted & names:
             raise ModelUnavailable(
                 f"Das Modell {self.model} ist nicht installiert. "
                 f"Bitte zuerst herunterladen mit: ollama pull {self.model}"

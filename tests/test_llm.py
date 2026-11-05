@@ -150,6 +150,14 @@ def test_check_available_model_missing():
         model.check_available()
 
 
+def test_check_available_accepts_latest_tag():
+    model = make_model(
+        lambda request: httpx.Response(200, json={"data": [{"id": "bge-m3:latest"}]}),
+        model="bge-m3",
+    )
+    model.check_available()
+
+
 def test_check_available_ollama_down():
     def handler(request):
         raise httpx.ConnectError("refused")
