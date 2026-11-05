@@ -1,7 +1,7 @@
 from chatsec.compare import compare, find_previous_run
 from chatsec.models import Category, Verdict
 from chatsec.scoring import summarize
-from tests.test_scoring import write_run
+from runfiles import write_run
 
 B, S = Verdict.BLOCKED, Verdict.SUCCESS
 END = {"type": "end", "finished": "2026-11-01T11:00:00"}
