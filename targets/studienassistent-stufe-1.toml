@@ -1,0 +1,20 @@
+# Übungs-Chatbot Studienassistent, Stufe 1. Start: python -m studienassistent --port 8100
+name = "Studienassistent Stufe 1"
+url = "http://127.0.0.1:8100/v1/chat/completions"
+timeout = 120.0
+
+[request]
+headers = { "Content-Type" = "application/json" }
+body = '''{"model": "stufe-1", "messages": "{{messages}}"}'''
+
+[response]
+path = "choices.0.message.content"
+
+[secrets]
+secret = "ZEBRA-42-KX"
+system_canary = "MUSTER-SYS-7Q"
+solution_file = "../src/studienassistent/data/klausur_db1_loesung.md"
+
+[permission]
+# localhost braucht keine Bestätigung.
+confirmed = false

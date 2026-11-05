@@ -1,0 +1,3 @@
+# Einstellungen des Studienassistenten (Übungs-Chatbot).
+canary = "MUSTER-SYS-7Q"
+port = 8100
