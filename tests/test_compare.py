@@ -31,3 +31,10 @@ def test_compare_and_find_previous(tmp_path):
     assert diff[None] == 50.0
     assert diff[k1] == 50.0
     assert diff[Category.K2] is None
+
+
+def test_find_previous_run_ignores_runs_without_end_line(tmp_path):
+    k1 = Category.K1
+    good = make(tmp_path, "20261101-100000-bot", "bot", [("a", k1, B)] * 3)
+    make(tmp_path, "20261102-100000-bot", "bot", [("a", k1, B)] * 3, end=None)
+    assert find_previous_run(tmp_path, "bot", "20261103-100000-bot") == good

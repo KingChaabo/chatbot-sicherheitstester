@@ -96,3 +96,18 @@ def test_load_run_errors(tmp_path):
     (mid / "attempts.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match="Zeile 2"):
         load_run(mid)
+
+
+def test_incomplete_attack_without_success_is_not_evaluated(tmp_path):
+    run = write_run(
+        tmp_path / "r",
+        [
+            ("k1-01", Category.K1, B), ("k1-01", Category.K1, B), ("k1-01", Category.K1, B),
+            ("k1-02", Category.K1, B),  # interrupted after one of three attempts
+            ("k1-03", Category.K1, S),  # a hit stays a hit even when interrupted
+        ],
+        attempts_per_attack=3,
+    )
+    s = summarize(run)
+    assert (s.overall.blocked, s.overall.success, s.overall.not_evaluated) == (1, 1, 1)
+    assert s.overall.defense_rate == 50.0

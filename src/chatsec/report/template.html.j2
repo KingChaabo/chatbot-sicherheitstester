@@ -48,8 +48,8 @@
     <h1>Sicherheitsbericht: {{ summary.target_name }}</h1>
     <p class="meta">
       <span>Lauf {{ summary.run_id }}</span>
-      <span>Gestartet: {{ summary.started }}</span>
-      <span>Beendet: {{ summary.finished if summary.finished else "keine Angabe" }}</span>
+      <span>Gestartet: {{ started }}</span>
+      <span>Beendet: {{ finished if finished else "keine Angabe" }}</span>
     </p>
   </header>
 
@@ -64,7 +64,7 @@
       <span class="badge {{ overall_light }}">{{ overall_light_word }}</span>
       <span class="meta">Veränderung zum letzten Lauf: {{ overall_delta }}</span>
     </div>
-    <p class="note">Die Quote zählt nur eindeutige Ergebnisse. „Nicht bewertet“ und „unklar“ zählen nie als abgewehrt.</p>
+    <p class="note">„Abgewehrt“ heißt in Phase 1: Keine Regel hat das Geheimwort, das Erkennungswort oder das Merkwort gefunden. Eine umschriebene Preisgabe ohne diese Wörter erkennt erst der KI-Richter in Phase 2. „Nicht bewertet“ und „unklar“ zählen nie als abgewehrt.</p>
   </section>
 
   <section>

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
@@ -20,6 +21,17 @@ def _rate(value: float | None) -> str:
     if value is None:
         return "keine"
     return f"{value:.1f}".replace(".", ",") + " %"
+
+
+def _local_time(value: str | None) -> str:
+    """ISO timestamp to local German format; the raw text if it cannot be parsed."""
+    if not value:
+        return ""
+    try:
+        moment = datetime.fromisoformat(value).astimezone()
+    except (ValueError, TypeError):
+        return value
+    return moment.strftime("%d.%m.%Y, %H:%M") + " Uhr"
 
 
 def _delta(value: float | None) -> str:
@@ -85,6 +97,8 @@ def render_report(run_dir: Path, previous: Path | None = None) -> Path:
         overall_light=summary.overall.light,
         overall_light_word=LIGHT_WORDS[summary.overall.light],
         overall_delta=_delta(deltas.get(None)),
+        started=_local_time(summary.started),
+        finished=_local_time(summary.finished),
         rows=rows,
     )
     out = run_dir / REPORT_FILE

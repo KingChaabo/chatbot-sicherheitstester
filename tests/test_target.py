@@ -259,3 +259,31 @@ def test_secret_paths_are_absolute_and_normalised(tmp_path, monkeypatch):
     assert cfg.solution_file.is_absolute()
     assert ".." not in cfg.solution_file.parts
     assert cfg.solution_file == (tmp_path / "x" / "l.md").resolve()
+
+
+def _toml(tmp_path, extra_top="", permission=""):
+    path = tmp_path / "t.toml"
+    path.write_text(
+        'name = "X"\nurl = "http://localhost/x"\n' + extra_top
+        + '[request]\nbody = "{}"\n[response]\npath = "a"\n' + permission,
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_permission_confirmed_must_be_a_real_boolean(tmp_path):
+    assert load_target(_toml(tmp_path)).permission_confirmed is False
+    assert load_target(_toml(tmp_path, permission="[permission]\nconfirmed = true\n")).permission_confirmed is True
+    assert load_target(_toml(tmp_path, permission="[permission]\nconfirmed = false\n")).permission_confirmed is False
+    for bad in ('"false"', '"nein"', "1", "0"):
+        with pytest.raises(ValueError, match=r"\[permission\] confirmed"):
+            load_target(_toml(tmp_path, permission=f"[permission]\nconfirmed = {bad}\n"))
+
+
+def test_max_rate_and_timeout_must_be_positive_numbers(tmp_path):
+    cfg = load_target(_toml(tmp_path, extra_top="max_rate = 5\ntimeout = 10.5\n"))
+    assert cfg.max_rate == 5.0 and cfg.timeout == 10.5
+    for key in ("max_rate", "timeout"):
+        for bad in ("0", "-1", '"schnell"', "true"):
+            with pytest.raises(ValueError, match=key):
+                load_target(_toml(tmp_path, extra_top=f"{key} = {bad}\n"))

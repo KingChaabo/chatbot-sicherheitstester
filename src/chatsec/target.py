@@ -44,6 +44,23 @@ def _require(table: dict, key: str, label: str):
     return table[key]
 
 
+def _number(data: dict, key: str, default: float) -> float:
+    value = data.get(key, default)
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+        raise ValueError(f"In der Anbindungsdatei muss '{key}' eine Zahl größer als 0 sein.")
+    return float(value)
+
+
+def _confirmed(permission: dict) -> bool:
+    value = permission.get("confirmed", False)
+    if not isinstance(value, bool):
+        raise ValueError(
+            "In der Anbindungsdatei muss [permission] confirmed entweder true oder false sein "
+            "(ohne Anführungszeichen)."
+        )
+    return value
+
+
 def load_target(path: Path) -> TargetConfig:
     path = Path(path)
     with path.open("rb") as handle:
@@ -67,10 +84,10 @@ def load_target(path: Path) -> TargetConfig:
         system_canary=secrets.get("system_canary"),
         solution_file=resolve("solution_file"),
         instructions_file=resolve("instructions_file"),
-        permission_confirmed=bool(permission.get("confirmed", False)),
+        permission_confirmed=_confirmed(permission),
         permission_note=permission.get("note", ""),
-        timeout=float(data.get("timeout", 60.0)),
-        max_rate=float(data.get("max_rate", 2.0)),
+        timeout=_number(data, "timeout", 60.0),
+        max_rate=_number(data, "max_rate", 2.0),
     )
 
 

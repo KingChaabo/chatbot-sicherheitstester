@@ -74,3 +74,22 @@ def test_report_shows_delta_to_previous(tmp_path):
     new = write_run(tmp_path / "new", [("a1", K1, B), ("a2", K1, B), ("a3", K1, B), ("a4", K1, S)])
     html = render_report(new, previous=old).read_text(encoding="utf-8")
     assert "+25,0 Pp" in html
+
+
+def test_report_shows_local_german_timestamps(tmp_path):
+    from chatsec.report.html import _local_time
+
+    end = {"type": "end", "finished": "2026-11-01T11:00:00+00:00"}
+    run = write_run(tmp_path / "r", [("a1", K1, B)], end=end)
+    html = render_report(run).read_text(encoding="utf-8")
+    assert "01.11.2026" in html and " Uhr" in html
+    assert "2026-11-01T11:00:00+00:00" not in html
+    assert _local_time("2026-11-05T12:05:25+00:00").startswith("05.11.2026, ")
+    assert _local_time("2026-11-05T12:05:25+00:00").endswith(" Uhr")
+    assert _local_time("kein datum") == "kein datum"
+
+
+def test_report_note_states_phase_1_limit(tmp_path):
+    run = write_run(tmp_path / "r", [("a1", K1, B)])
+    html = render_report(run).read_text(encoding="utf-8")
+    assert "Phase 1" in html and "KI-Richter" in html

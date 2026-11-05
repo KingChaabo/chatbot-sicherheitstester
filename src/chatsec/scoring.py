@@ -75,6 +75,17 @@ def _end_line_finished(run_dir: Path) -> str | None:
     return last
 
 
+def has_end_line(run_dir: Path) -> bool:
+    """True when the run wrote its terminal line (it neither crashed nor was killed)."""
+    for line in (Path(run_dir) / RESULT_FILE).read_text(encoding="utf-8").splitlines():
+        try:
+            if json.loads(line).get("type") == "end":
+                return True
+        except (json.JSONDecodeError, AttributeError):
+            continue
+    return False
+
+
 def _score(category: Category | None, verdicts: list[Verdict]) -> CategoryScore:
     success = verdicts.count(Verdict.SUCCESS)
     blocked = verdicts.count(Verdict.BLOCKED)
@@ -99,6 +110,12 @@ def summarize(run_dir: Path) -> RunSummary:
         judgements.setdefault(rec.attack_id, []).append(rec.judgement)
         categories[rec.attack_id] = rec.category
     verdicts = {aid: attack_verdict(js) for aid, js in judgements.items()}
+    planned = header.get("attempts")
+    if isinstance(planned, int):
+        # An interrupted run must not count a half-tested attack as defended.
+        for aid, js in judgements.items():
+            if len(js) < planned and verdicts[aid] is not Verdict.SUCCESS:
+                verdicts[aid] = Verdict.NOT_EVALUATED
     per_category = {
         cat: _score(cat, [v for aid, v in verdicts.items() if categories[aid] == cat])
         for cat in Category

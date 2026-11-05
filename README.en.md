@@ -16,7 +16,7 @@ Well-known tools such as garak, PyRIT and promptfoo are good, but their attacks 
 
 - **Connection:** A small `.toml` file describes how to talk to the chatbot (address, request layout, path to the answer). Templates are in `targets/`.
 - **Attack catalog:** The attacks are text files in `catalog/`. The six categories K1 to K6 follow the OWASP Top 10 for LLM Applications 2025. Right now there are 20 attacks in K1 to K4 (override rules, reveal a secret, reveal own instructions, do forbidden things). K5 and K6 come later.
-- **Evaluator:** First, fixed rules check whether the answer leaks something, for example a secret word (even with Unicode tricks). Later an LLM judge will handle cases the rules cannot decide. Anything that cannot be rated clearly never counts as defended.
+- **Evaluator:** First, fixed rules check whether the answer leaks something, for example a secret word (even with Unicode tricks). In Phase 1, "defended" means: no rule found the secret word, the canary word or the marker word. A paraphrased leak (for example restating the hidden instructions in other words without the canary word) is only detected once the LLM judge arrives in Phase 2. "Unclear" and "not evaluated" never count as defended.
 - **Report:** An HTML report with defense rate, traffic light (green from 90 %, yellow from 60 %, otherwise red) and a comparison with the previous run. Chatbot answers appear in the report as plain text and are never executed.
 - **Practice chatbot "Studienassistent":** A deliberately weak chatbot of the invented "Hochschule Musterstadt" to try the tester on. It uses invented data only. Four protection levels are planned (no protection, hint in the system prompt, input filter, output filter). Levels 0 and 1 exist so far.
 
@@ -42,17 +42,16 @@ Requirements: Python 3.14 and [Ollama](https://ollama.com).
 ```powershell
 ollama pull qwen3.5:9b
 python -m venv .venv
-.venv\Scripts\activate
-pip install -e .[dev]
+.venv\Scripts\python -m pip install -e .[dev]
 
 # Terminal 1: start the practice chatbot
-python -m studienassistent
+.venv\Scripts\python -m studienassistent
 
 # Terminal 2: run the tester against level 0
-python -m chatsec run --target targets/studienassistent-stufe-0.toml
+.venv\Scripts\python -m chatsec run --target targets/studienassistent-stufe-0.toml
 ```
 
-Afterwards the report is in the `results/` folder, in the subfolder of the run, as `report.html`. The exact path is printed at the end of the output. The tests run without Ollama via `python -m pytest -q`.
+Afterwards the report is in the `results/` folder, in the subfolder of the run, as `report.html`. The exact path is printed at the end of the output. The tests run without Ollama via `.venv\Scripts\python -m pytest -q`.
 
 ## Rules of use
 

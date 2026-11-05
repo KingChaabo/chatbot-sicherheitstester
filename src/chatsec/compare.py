@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from chatsec.models import Category, RunSummary
-from chatsec.scoring import RESULT_FILE, load_run
+from chatsec.scoring import RESULT_FILE, has_end_line, load_run
 
 
 def find_previous_run(results_dir: Path, target_name: str, before_run_id: str) -> Path | None:
@@ -19,6 +19,8 @@ def find_previous_run(results_dir: Path, target_name: str, before_run_id: str) -
             continue
         run_id = header.get("run_id")
         if header.get("target_name") != target_name or abort is not None:
+            continue
+        if not has_end_line(run_dir):
             continue
         if not isinstance(run_id, str) or run_id >= before_run_id:
             continue

@@ -18,8 +18,14 @@ def write_run(
     target: str = "bot",
     end: dict | None = None,
     raw_tail: str = "",
+    attempts_per_attack: int | None = None,
 ) -> Path:
     run_dir.mkdir(parents=True, exist_ok=True)
+    if attempts_per_attack is None:
+        per: dict[str, int] = {}
+        for attack_id, _, _ in attempts:
+            per[attack_id] = per.get(attack_id, 0) + 1
+        attempts_per_attack = max(per.values(), default=3)
     lines = [
         json.dumps(
             {
@@ -27,7 +33,7 @@ def write_run(
                 "run_id": run_id,
                 "target_name": target,
                 "started": "2026-11-01T10:00:00",
-                "attempts": 3,
+                "attempts": attempts_per_attack,
                 "attack_count": len({a[0] for a in attempts}),
             }
         )
