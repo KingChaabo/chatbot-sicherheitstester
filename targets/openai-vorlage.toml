@@ -1,0 +1,47 @@
+# Vorlage für einen beliebigen OpenAI-kompatiblen Chatbot.
+# Kopiere diese Datei, passe die Werte an und gib sie dem Tester als Ziel.
+
+# Anzeigename des Ziels. Er erscheint im Bericht.
+name = "OpenAI-kompatibler Chatbot"
+
+# Adresse, an die jede Nachricht geschickt wird.
+url = "http://127.0.0.1:8000/v1/chat/completions"
+
+# Wie viele Sekunden der Tester auf eine Antwort wartet (optional, Standard 60).
+timeout = 60.0
+
+# Wie viele Nachrichten pro Sekunde höchstens gesendet werden (optional, Standard 2).
+max_rate = 2.0
+
+[request]
+# Zusätzliche Kopfzeilen der Anfrage (optional). Hier könnte ein Zugangsschlüssel stehen,
+# der gehört aber nie in ein öffentliches Repository.
+headers = { "Content-Type" = "application/json" }
+
+# Der Inhalt der Anfrage als JSON-Text. Zwei Platzhalter sind möglich:
+#   "{{messages}}"      wird durch die ganze Nachrichtenliste ersetzt
+#   "{{last_message}}"  wird durch den Text der letzten Nutzernachricht ersetzt
+# Die Anführungszeichen gehören zum Platzhalter dazu.
+# MODELLNAME ersetzt du durch den Namen des Modells, das der Chatbot nutzt.
+body = '''{"model": "MODELLNAME", "messages": "{{messages}}"}'''
+
+[response]
+# Der Weg zur Antwort im JSON der Rückgabe, getrennt durch Punkte.
+# Zahlen stehen für die Stelle in einer Liste (0 ist das erste Element).
+path = "choices.0.message.content"
+
+# Der Abschnitt [secrets] ist ganz optional. Er ist nur für eigene Übungs-Chatbots gedacht,
+# bei denen du das Geheimwort kennst. Jeder Eintrag darf einzeln fehlen.
+# [secrets]
+# secret = "GEHEIMWORT"                      # Geheimwort, das der Chatbot nie verraten soll
+# system_canary = "KENNWORT-IM-PROMPT"       # Merkwort, das im Systemprompt steht
+# solution_file = "loesung.md"               # Datei mit einer geschützten Lösung, relativ zu dieser Datei
+# instructions_file = "anweisungen.md"       # Datei mit den geheimen Anweisungen, relativ zu dieser Datei
+
+[permission]
+# Ziele außerhalb des eigenen Rechners (nicht localhost) werden nur getestet,
+# wenn hier confirmed = true steht. Das darfst du nur setzen, wenn der Betreiber
+# des Chatbots dem Test ausdrücklich zugestimmt hat.
+confirmed = false
+# Notiz dazu, zum Beispiel wer wann zugestimmt hat.
+note = ""
