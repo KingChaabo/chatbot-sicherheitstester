@@ -1,0 +1,32 @@
+# Alle KI-Aufrufe laufen ueber die OpenAI-kompatible Schnittstelle (Standard: lokales Ollama).
+
+[assistant]
+base_url = "http://127.0.0.1:11434/v1"
+model = "qwen3.5:9b"
+reasoning_effort = "none"
+
+# Die folgenden Rollen sind Kandidaten aus Phase 0 und werden in spaeteren Phasen entschieden.
+
+# Richter: wird in Phase 2 entschieden.
+[judge]
+base_url = "http://127.0.0.1:11434/v1"
+model = "gemma4:12b"
+reasoning_effort = "none"
+
+# Angreifer: wird in Phase 3 entschieden.
+[attacker]
+base_url = "http://127.0.0.1:11434/v1"
+model = "dolphin3:8b"
+reasoning_effort = "none"
+
+# Embedding: wird in Phase 4 entschieden.
+[embedding]
+base_url = "http://127.0.0.1:11434/v1"
+model = "bge-m3"
+reasoning_effort = "none"
+
+# Assistent fuer die CI: wird in Phase 5 entschieden.
+[ci_assistant]
+base_url = "http://127.0.0.1:11434/v1"
+model = "qwen2.5:1.5b"
+reasoning_effort = "none"
