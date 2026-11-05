@@ -1,0 +1,6 @@
+.venv/
+results/
+labels/
+__pycache__/
+*.egg-info/
+.superpowers/
